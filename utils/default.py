@@ -76,10 +76,10 @@ def set_model_config(args):
 
     args.image_size = (32, 32, 3)
     if args.dataset == 'cifar10':
-        args.ood_data = ["svhn", 'cifar100', 'lsun', 'imagenet']
+        args.ood_data = []
 
     elif args.dataset == 'cifar100' or args.dataset == 'tinyimagenet':
-        args.ood_data = ['cifar10', "svhn", 'lsun', 'imagenet']
+        args.ood_data = []
 
     elif args.dataset == 'imagenet':
         args.ood_data = []

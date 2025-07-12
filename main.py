@@ -93,12 +93,12 @@ def main():
         logger.info(f"  Total train batch size = {args.batch_size*args.world_size}")
         logger.info(f"  Total optimization steps = {args.total_steps}")
         train(args, labeled_trainloader, unlabeled_dataset, test_loader, val_loader,
-              ood_loaders, model, optimizer, ema_model, scheduler)
+              model, optimizer, ema_model, scheduler)
     else:
         logger.info("***** Running Evaluation *****")
         logger.info(f"  Task = {args.dataset}@{args.num_labeled}")
         eval_model(args, labeled_trainloader, unlabeled_dataset, test_loader, val_loader,
-             ood_loaders, model, ema_model)
+             model, ema_model)
 
 
 if __name__ == '__main__':

@@ -45,6 +45,8 @@ def train(args, labeled_trainloader, unlabeled_dataset, test_loader, val_loader,
 
     model.train()
     unlabeled_dataset_all = copy.deepcopy(unlabeled_dataset)
+
+
     labeled_dataset = copy.deepcopy(labeled_trainloader.dataset)
     train_sampler = RandomSampler if args.local_rank == -1 else DistributedSampler
 
@@ -69,7 +71,7 @@ def train(args, labeled_trainloader, unlabeled_dataset, test_loader, val_loader,
     unlabeled_iter = iter(unlabeled_trainloader)
     unlabeled_all_iter = iter(unlabeled_trainloader_all)
 
-    selected_ood_maxlength = max(8 * args.num_classes, 256)
+    selected_ood_maxlength = max(8 * args.num_classes, args.batch_size)
     selected_ood_update_length = args.Km
     selected_ood_count = 0
     selected_ood_scores = deque(maxlen=selected_ood_maxlength)
@@ -198,6 +200,9 @@ def train(args, labeled_trainloader, unlabeled_dataset, test_loader, val_loader,
                             reduction='none') * mask_pos.repeat(2)
                 ).mean()
 
+            if selected_ood_count <= args.batch_size:
+                L_unsup_open = torch.zeros(1).to(args.device).mean()
+
 
             logits_p_u_close_w = logits_close_w[:, :num_classes]
             logits_p_u_close_s = logits_close_s[:, :num_classes]
@@ -208,7 +213,7 @@ def train(args, labeled_trainloader, unlabeled_dataset, test_loader, val_loader,
             max_probs_close, targets_close = torch.max(pseudo_close, dim=-1)
             max_probs_open, targets_open = torch.max(pseudo_open, dim=-1)
 
-            mask = max_probs.ge(args.threshold).float()
+            mask = max_probs_close.ge(args.threshold).float()
             id_mask = (targets_open < num_classes)
             L_unsup_close = (F.cross_entropy(logits_p_u_close_s,
                                      targets_close,
